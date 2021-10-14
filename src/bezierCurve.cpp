@@ -185,7 +185,7 @@ namespace CGL {
       y *= height / (float)width;
     }
 
-    if (keys == 4)
+    if (keys == '4' || keys == 4)
     {
       if (selected >= 0)
       {
