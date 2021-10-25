@@ -88,7 +88,24 @@ namespace CGL
     // Returns an approximate unit normal at this vertex, computed by
     // taking the area-weighted average of the normals of neighboring
     // triangles, then normalizing.
-    return Vector3D();
+
+    int cnt = 0;
+    Vector3D ans = Vector3D(0,0,0);
+    HalfedgeCIter h = halfedge();
+    do {
+      Vector3D A = h->vertex()->position;
+      Vector3D B = h->next()->vertex()->position;
+      Vector3D C = h->next()->next()->vertex()->position;
+
+      ans = ans + cross(B-A, C-A).unit();
+      cnt++;
+
+      HalfedgeCIter h_twin = h -> twin();
+      VertexCIter v = h_twin -> vertex();
+      h = h_twin -> next();
+    } while (h!= halfedge());
+
+    return ans/cnt;
   }
 
   EdgeIter HalfedgeMesh::flipEdge( EdgeIter e0 )
