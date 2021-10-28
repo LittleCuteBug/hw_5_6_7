@@ -89,7 +89,6 @@ namespace CGL
     // taking the area-weighted average of the normals of neighboring
     // triangles, then normalizing.
 
-    int cnt = 0;
     Vector3D ans = Vector3D(0,0,0);
     HalfedgeCIter h = halfedge();
     do {
@@ -97,15 +96,13 @@ namespace CGL
       Vector3D B = h->next()->vertex()->position;
       Vector3D C = h->next()->next()->vertex()->position;
 
-      ans = ans + cross(B-A, C-A).unit();
-      cnt++;
+      ans = ans + cross(B-A, C-A);
 
       HalfedgeCIter h_twin = h -> twin();
       VertexCIter v = h_twin -> vertex();
       h = h_twin -> next();
     } while (h!= halfedge());
-
-    return ans/cnt;
+    return ans.unit();
   }
 
   EdgeIter HalfedgeMesh::flipEdge( EdgeIter e0 )
