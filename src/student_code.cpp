@@ -109,7 +109,48 @@ namespace CGL
   {
     // TODO Part 4.
     // This method should flip the given edge and return an iterator to the flipped edge.
-    return EdgeIter();
+    if(e0->isBoundary())
+        return e0;
+
+    HalfedgeIter halfedgeIter_BC = e0->halfedge();
+    HalfedgeIter halfedgeIter_CB = halfedgeIter_BC->twin();
+
+    HalfedgeIter halfedgeIter_CA = halfedgeIter_BC->next();
+    HalfedgeIter halfedgeIter_AB = halfedgeIter_CA->next();
+
+    HalfedgeIter halfedgeIter_BD = halfedgeIter_CB->next();
+    HalfedgeIter halfedgeIter_DC = halfedgeIter_BD->next();
+
+    FaceIter faceIter_1 = halfedgeIter_BC->face();
+    FaceIter faceIter_2 = halfedgeIter_CB->face();
+
+    VertexIter vertexIterB = halfedgeIter_BC->vertex();
+    VertexIter vertexIterC = halfedgeIter_CB->vertex();
+    VertexIter vertexIterA = halfedgeIter_AB->vertex();
+    VertexIter vertexIterD = halfedgeIter_DC->vertex();
+
+
+    faceIter_1->halfedge() = halfedgeIter_BC;
+    faceIter_2->halfedge() = halfedgeIter_CB;
+
+    vertexIterB->halfedge() = halfedgeIter_BD;
+    vertexIterC->halfedge() = halfedgeIter_CA;
+
+    halfedgeIter_BC->next() = halfedgeIter_DC;
+    halfedgeIter_DC->next() = halfedgeIter_CA;
+    halfedgeIter_CA->next() = halfedgeIter_BC;
+
+    halfedgeIter_CB->next() = halfedgeIter_AB;
+    halfedgeIter_AB->next() = halfedgeIter_BD;
+    halfedgeIter_BD->next() = halfedgeIter_CB;
+
+    halfedgeIter_BC->vertex() = vertexIterA;
+    halfedgeIter_CB->vertex() = vertexIterD;
+
+    halfedgeIter_DC->face() = faceIter_1;
+    halfedgeIter_AB->face() = faceIter_2;
+
+    return e0;
   }
 
   VertexIter HalfedgeMesh::splitEdge( EdgeIter e0 )
@@ -117,7 +158,155 @@ namespace CGL
     // TODO Part 5.
     // This method should split the given edge and return an iterator to the newly inserted vertex.
     // The halfedge of this vertex should point along the edge that was split, rather than the new edges.
-    return VertexIter();
+
+    HalfedgeIter halfedgeIter_BC = e0->halfedge();
+    HalfedgeIter halfedgeIter_CB = halfedgeIter_BC->twin();
+
+    VertexIter vertexIter_B = halfedgeIter_BC->vertex();
+    VertexIter vertexIter_C = halfedgeIter_CB->vertex();
+
+    VertexIter vertexIter_M = newVertex(); // Done
+
+    EdgeIter edgeIter_CM = newEdge(); // Done
+    EdgeIter edgeIter_MB = newEdge(); // Done
+
+    HalfedgeIter halfedgeIter_MC = newHalfedge();  //
+    HalfedgeIter halfedgeIter_CM = newHalfedge();  //
+    HalfedgeIter halfedgeIter_MB = newHalfedge();  //
+    HalfedgeIter halfedgeIter_BM = newHalfedge();  //
+
+    vertexIter_M->position = (vertexIter_B->position + vertexIter_C->position)/2.0;
+    vertexIter_M->halfedge() = halfedgeIter_MB;
+
+    edgeIter_CM->halfedge() = halfedgeIter_CM;
+    edgeIter_MB->halfedge() = halfedgeIter_MB;
+
+    halfedgeIter_MC->twin() = halfedgeIter_CM;
+    halfedgeIter_CM->twin() = halfedgeIter_MC;
+    halfedgeIter_MB->twin() = halfedgeIter_BM;
+    halfedgeIter_BM->twin() = halfedgeIter_MB;
+
+    halfedgeIter_MC->vertex() = vertexIter_M;
+    halfedgeIter_CM->vertex() = vertexIter_C;
+    halfedgeIter_MB->vertex() = vertexIter_M;
+    halfedgeIter_BM->vertex() = vertexIter_B;
+
+    halfedgeIter_MC->edge() = edgeIter_CM;
+    halfedgeIter_CM->edge() = edgeIter_CM;
+    halfedgeIter_MB->edge() = edgeIter_MB;
+    halfedgeIter_BM->edge() = edgeIter_MB;
+
+
+    FaceIter faceIter_1 = halfedgeIter_BC->face();
+    FaceIter faceIter_2 = halfedgeIter_CB->face();
+
+    if(!halfedgeIter_BC->isBoundary()) {
+      HalfedgeIter halfedgeIter_CA = halfedgeIter_BC->next();
+      HalfedgeIter halfedgeIter_AB = halfedgeIter_CA->next();
+
+      VertexIter vertexIter_A = halfedgeIter_AB->vertex();
+
+
+      FaceIter faceIter_A = newFace(); // Done
+      FaceIter faceIter_B = newFace(); // Done
+
+      faceIter_A->halfedge() = halfedgeIter_CA;
+      faceIter_B->halfedge() = halfedgeIter_AB;
+
+      EdgeIter edgeIter_AM = newEdge(); // Done
+
+      HalfedgeIter halfedgeIter_MA = newHalfedge(); // Done
+      HalfedgeIter halfedgeIter_AM = newHalfedge(); // Done
+
+      edgeIter_AM->halfedge() = halfedgeIter_AM;
+
+      halfedgeIter_AM->twin() = halfedgeIter_MA;
+      halfedgeIter_MA->twin() = halfedgeIter_AM;
+      halfedgeIter_AM->vertex() = vertexIter_A;
+      halfedgeIter_MA->vertex() = vertexIter_M;
+      halfedgeIter_AM->edge() = edgeIter_AM;
+      halfedgeIter_MA->edge() = edgeIter_AM;
+
+      halfedgeIter_AM->face() = faceIter_A;
+      halfedgeIter_MC->face() = faceIter_A;
+      halfedgeIter_CA->face() = faceIter_A;
+
+      halfedgeIter_MA->face() = faceIter_B;
+      halfedgeIter_AB->face() = faceIter_B;
+      halfedgeIter_BM->face() = faceIter_B;
+
+      halfedgeIter_AM->next() = halfedgeIter_MC;
+      halfedgeIter_MC->next() = halfedgeIter_CA;
+      halfedgeIter_CA->next() = halfedgeIter_AM;
+
+      halfedgeIter_MA->next() = halfedgeIter_AB;
+      halfedgeIter_AB->next() = halfedgeIter_BM;
+      halfedgeIter_BM->next() = halfedgeIter_MA;
+
+      deleteFace(faceIter_1);
+    } else {
+      halfedgeIter_BM->next() = halfedgeIter_MC;
+      halfedgeIter_BM->face() = faceIter_1;
+      halfedgeIter_MC->next() = halfedgeIter_BC->next();
+      halfedgeIter_MC->face() = faceIter_1;
+    }
+
+    if(!halfedgeIter_CB->isBoundary()) {
+      HalfedgeIter halfedgeIter_BD = halfedgeIter_CB->next();
+      HalfedgeIter halfedgeIter_DC = halfedgeIter_BD->next();
+
+      VertexIter vertexIter_D = halfedgeIter_DC->vertex();
+
+      FaceIter faceIter_C = newFace();
+      FaceIter faceIter_D = newFace();
+
+      faceIter_C->halfedge() = halfedgeIter_DC;
+      faceIter_D->halfedge() = halfedgeIter_BD;
+
+      EdgeIter edgeIter_MD = newEdge();
+
+      HalfedgeIter halfedgeIter_MD = newHalfedge();
+      HalfedgeIter halfedgeIter_DM = newHalfedge();
+
+      edgeIter_MD->halfedge() = halfedgeIter_MD;
+
+      halfedgeIter_MD->twin() = halfedgeIter_DM;
+      halfedgeIter_DM->twin() = halfedgeIter_MD;
+      halfedgeIter_MD->vertex() = vertexIter_M;
+      halfedgeIter_DM->vertex() = vertexIter_D;
+      halfedgeIter_MD->edge() = edgeIter_MD;
+      halfedgeIter_DM->edge() = edgeIter_MD;
+
+      halfedgeIter_CM->face() = faceIter_C;
+      halfedgeIter_MD->face() = faceIter_C;
+      halfedgeIter_DC->face() = faceIter_C;
+
+      halfedgeIter_DM->face() = faceIter_D;
+      halfedgeIter_MB->face() = faceIter_D;
+      halfedgeIter_BD->face() = faceIter_D;
+
+      halfedgeIter_CM->next() = halfedgeIter_MD;
+      halfedgeIter_MD->next() = halfedgeIter_DC;
+      halfedgeIter_DC->next() = halfedgeIter_CM;
+
+      halfedgeIter_DM->next() = halfedgeIter_MB;
+      halfedgeIter_MB->next() = halfedgeIter_BD;
+      halfedgeIter_BD->next() = halfedgeIter_DM;
+
+      deleteFace(faceIter_2);
+
+    } else {
+      halfedgeIter_CM->next() = halfedgeIter_MB;
+      halfedgeIter_CM->face() = faceIter_2;
+      halfedgeIter_MB->next() = halfedgeIter_CB->next();
+      halfedgeIter_MB->face() = faceIter_2;
+    }
+
+    deleteEdge(e0);
+    deleteHalfedge(halfedgeIter_BC);
+    deleteHalfedge(halfedgeIter_CB);
+
+    return vertexIter_M;
   }
 
 
