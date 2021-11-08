@@ -167,6 +167,8 @@ namespace CGL
 
     VertexIter vertexIter_M = newVertex();
 
+    vertexIter_M->isNew = true;
+
     EdgeIter edgeIter_CM = newEdge();
     EdgeIter edgeIter_MB = newEdge();
 
@@ -176,6 +178,7 @@ namespace CGL
     HalfedgeIter halfedgeIter_BM = newHalfedge();
 
     vertexIter_M->position = (vertexIter_B->position + vertexIter_C->position)/2.0;
+    vertexIter_M->newPosition = e0->newPosition;
     vertexIter_M->halfedge() = halfedgeIter_MB;
 
     edgeIter_CM->halfedge() = halfedgeIter_CM;
@@ -216,6 +219,7 @@ namespace CGL
       faceIter_B->halfedge() = halfedgeIter_AB;
 
       EdgeIter edgeIter_AM = newEdge();
+      edgeIter_AM->isNew = true;
 
       HalfedgeIter halfedgeIter_MA = newHalfedge();
       HalfedgeIter halfedgeIter_AM = newHalfedge();
@@ -266,6 +270,7 @@ namespace CGL
       faceIter_D->halfedge() = halfedgeIter_BD;
 
       EdgeIter edgeIter_MD = newEdge();
+      edgeIter_MD->isNew = true;
 
       HalfedgeIter halfedgeIter_MD = newHalfedge();
       HalfedgeIter halfedgeIter_DM = newHalfedge();
@@ -334,5 +339,58 @@ namespace CGL
 
     // 5. Copy the new vertex positions into final Vertex::position.
 
+    for(EdgeIter edgeIter = mesh.edgesBegin(); edgeIter != mesh.edgesEnd(); edgeIter++)
+    {
+      Vector3D vertex_A = edgeIter->halfedge()->vertex()->position;
+      Vector3D vertex_B = edgeIter->halfedge()->twin()->vertex()->position;
+      Vector3D vertex_C = edgeIter->halfedge()->next()->twin()->vertex()->position;
+      Vector3D vertex_D = edgeIter->halfedge()->twin()->next()->twin()->vertex()->position;
+
+      edgeIter->newPosition = 3.0/8*(vertex_A+vertex_B) + 1.0/8*(vertex_C+vertex_D);
+    }
+
+
+    for(VertexIter vertexIter = mesh.verticesBegin(); vertexIter != mesh.verticesEnd(); vertexIter++)
+    {
+      HalfedgeIter halfedgeIter = vertexIter->halfedge();
+      Vector3D original_neighbor_position_sum = Vector3D(0,0,0);
+      int n = 0;
+      do{
+        original_neighbor_position_sum += halfedgeIter->twin()->vertex()->position;
+        halfedgeIter = halfedgeIter->twin()->next();
+        n++;
+      } while (halfedgeIter != vertexIter->halfedge());
+      double u = 3.0/16;
+      if(n != 3)
+        u = 3.0/(8*n);
+
+      vertexIter->newPosition = (1 - n*u) * vertexIter->position + u * original_neighbor_position_sum;
+    }
+
+    for(EdgeIter edgeIter = mesh.edgesBegin(); edgeIter != mesh.edgesEnd(); edgeIter++)
+    {
+      if(!edgeIter->halfedge()->vertex()->isNew && !edgeIter->halfedge()->twin()->vertex()->isNew)
+        mesh.splitEdge(edgeIter);
+    }
+
+    for(EdgeIter edgeIter = mesh.edgesBegin(); edgeIter != mesh.edgesEnd(); edgeIter++)
+    {
+      bool edgeNew = edgeIter->isNew;
+      bool vertexANew = edgeIter->halfedge()->vertex()->isNew;
+      bool vertexBNew = edgeIter->halfedge()->twin()->vertex()->isNew;
+
+      if(edgeNew && (vertexANew ^ vertexBNew))
+        mesh.flipEdge(edgeIter);
+    }
+
+    for(EdgeIter edgeIter = mesh.edgesBegin(); edgeIter != mesh.edgesEnd(); edgeIter++)
+    {
+      edgeIter->isNew = false;
+    }
+    for(VertexIter vertexIter = mesh.verticesBegin(); vertexIter != mesh.verticesEnd(); vertexIter++)
+    {
+      vertexIter->position = vertexIter->newPosition;
+      vertexIter->isNew = false;
+    }
   }
 }
