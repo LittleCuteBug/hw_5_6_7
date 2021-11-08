@@ -165,15 +165,15 @@ namespace CGL
     VertexIter vertexIter_B = halfedgeIter_BC->vertex();
     VertexIter vertexIter_C = halfedgeIter_CB->vertex();
 
-    VertexIter vertexIter_M = newVertex(); // Done
+    VertexIter vertexIter_M = newVertex();
 
-    EdgeIter edgeIter_CM = newEdge(); // Done
-    EdgeIter edgeIter_MB = newEdge(); // Done
+    EdgeIter edgeIter_CM = newEdge();
+    EdgeIter edgeIter_MB = newEdge();
 
-    HalfedgeIter halfedgeIter_MC = newHalfedge();  //
-    HalfedgeIter halfedgeIter_CM = newHalfedge();  //
-    HalfedgeIter halfedgeIter_MB = newHalfedge();  //
-    HalfedgeIter halfedgeIter_BM = newHalfedge();  //
+    HalfedgeIter halfedgeIter_MC = newHalfedge();
+    HalfedgeIter halfedgeIter_CM = newHalfedge();
+    HalfedgeIter halfedgeIter_MB = newHalfedge();
+    HalfedgeIter halfedgeIter_BM = newHalfedge();
 
     vertexIter_M->position = (vertexIter_B->position + vertexIter_C->position)/2.0;
     vertexIter_M->halfedge() = halfedgeIter_MB;
@@ -196,6 +196,8 @@ namespace CGL
     halfedgeIter_MB->edge() = edgeIter_MB;
     halfedgeIter_BM->edge() = edgeIter_MB;
 
+    vertexIter_B->halfedge() = halfedgeIter_BM;
+    vertexIter_C->halfedge() = halfedgeIter_CM;
 
     FaceIter faceIter_1 = halfedgeIter_BC->face();
     FaceIter faceIter_2 = halfedgeIter_CB->face();
@@ -207,16 +209,16 @@ namespace CGL
       VertexIter vertexIter_A = halfedgeIter_AB->vertex();
 
 
-      FaceIter faceIter_A = newFace(); // Done
-      FaceIter faceIter_B = newFace(); // Done
+      FaceIter faceIter_A = newFace();
+      FaceIter faceIter_B = newFace();
 
       faceIter_A->halfedge() = halfedgeIter_CA;
       faceIter_B->halfedge() = halfedgeIter_AB;
 
-      EdgeIter edgeIter_AM = newEdge(); // Done
+      EdgeIter edgeIter_AM = newEdge();
 
-      HalfedgeIter halfedgeIter_MA = newHalfedge(); // Done
-      HalfedgeIter halfedgeIter_AM = newHalfedge(); // Done
+      HalfedgeIter halfedgeIter_MA = newHalfedge();
+      HalfedgeIter halfedgeIter_AM = newHalfedge();
 
       edgeIter_AM->halfedge() = halfedgeIter_AM;
 
