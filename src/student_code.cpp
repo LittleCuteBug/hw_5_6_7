@@ -341,6 +341,15 @@ namespace CGL
 
     for(EdgeIter edgeIter = mesh.edgesBegin(); edgeIter != mesh.edgesEnd(); edgeIter++)
     {
+      edgeIter->isNew = false;
+    }
+    for(VertexIter vertexIter = mesh.verticesBegin(); vertexIter != mesh.verticesEnd(); vertexIter++)
+    {
+      vertexIter->isNew = false;
+    }
+
+    for(EdgeIter edgeIter = mesh.edgesBegin(); edgeIter != mesh.edgesEnd(); edgeIter++)
+    {
       Vector3D vertex_A = edgeIter->halfedge()->vertex()->position;
       Vector3D vertex_B = edgeIter->halfedge()->twin()->vertex()->position;
       Vector3D vertex_C = edgeIter->halfedge()->next()->twin()->vertex()->position;
@@ -383,14 +392,9 @@ namespace CGL
         mesh.flipEdge(edgeIter);
     }
 
-    for(EdgeIter edgeIter = mesh.edgesBegin(); edgeIter != mesh.edgesEnd(); edgeIter++)
-    {
-      edgeIter->isNew = false;
-    }
     for(VertexIter vertexIter = mesh.verticesBegin(); vertexIter != mesh.verticesEnd(); vertexIter++)
     {
       vertexIter->position = vertexIter->newPosition;
-      vertexIter->isNew = false;
     }
   }
 }
